@@ -3,7 +3,7 @@
 #'
 #' @description Calculates a correlation, distance, and p-value matrix using one of the
 #'     specified robust methods Taba linear or Taba rank correlation.
-#' @usage taba.matrix(x, y, ..., method = c("taba", "tabarank"),
+#' @usage taba.matrix(x, y = NULL, ..., method = c("taba", "tabarank"),
 #'             alternative = c("less", "greater", "two.sided"),
 #'             omega = 0.45)
 #' @param x A numeric vector of length greater than 2 must be same length as all other vectors.
@@ -23,7 +23,8 @@
 #'    the function will default to 0.45. Range is between 0 and 1.
 #' @details This function uses Taba linear or Taba rank (monotonic) correlation to
 #'    calculate the association of two or more numeric vectors. Numeric vectors under \code{...}
-#'    are combined colomn-wise with x and y. \cr
+#'    are combined colomn-wise with x and y. When inserting a single matrix x, the function will
+#'    calculate the correlation matix using the columns of matrix x. \cr
 #'    Matricies or data frames with numeric cells can be inserted in \code{...}, whereby
 #'    each column in the matrix or data frame will be treated as a different vector
 #'    for comparison. Columns must all have different names from each other. No vector
@@ -47,13 +48,16 @@
 #' z1 = rnorm(100)
 #' z2 = rnorm(100)
 #' z3 = rnorm(100)
-#' taba.partial(x, y, z1, z2, z3, method = "tabarank")
-#' taba.partial(x, y, z2, alternative = "less", omega = 0.4)
+#' Z = cbind(z1,z3)
+#' colnames(Z) = c("A","B")
+#' taba.matrix(x, y, z1, z2, z3, method = "tabarank")
+#' taba.matrix(x, y, z2, Z, alternative = "less", omega = 0.4)
+#' taba.matrix(Z, method = "tabarank")
 #' @import robustbase
 #'         stats
 #' @export taba.matrix
 
-taba.matrix = function(x, y, ..., method = c("taba", "tabarank"),
+taba.matrix = function(x, y = NULL, ..., method = c("taba", "tabarank"),
                        alternative = c("less", "greater", "two.sided"),
                        omega = 0.45) {
   if (missing(method)) {
@@ -79,46 +83,55 @@ taba.matrix = function(x, y, ..., method = c("taba", "tabarank"),
     stop("'omega' must be between 0 and 1")
     omega <- match.arg(omega)
   }
-    y <- as.data.frame(y)
     x <- as.data.frame(x)
   if (!(is.numeric(x[,1]) || is.logical(x[,1]))) {
     stop("'x' must be numeric")
     stopifnot(is.atomic(x[,1]))
   }
-  if (!(is.numeric(y[,1]) || is.logical(y[,1])))
-    stop("'y' must be numeric")
-  stopifnot(is.atomic(y[,1]))
-  if (missing(...)) {
-    if (length(x) != length(y)) {
-      stop("'x' and 'y' must have the same length")
+  if (!is.null(y)) { #Inserted
+      y <- as.data.frame(y)
+    if (!(is.numeric(y[,1]) || is.logical(y[,1])))
+      stop("'y' must be numeric")
+      stopifnot(is.atomic(y[,1]))
+    if (missing(...)) {
+      if (sum(is.na(x)) > 0 || sum(is.na(y)) > 0) {
+        warning("Missing data included in dataset was removed row-wise. Results may not be accurate.")
+        miss <- which(complete.cases(x,y) == FALSE)
+        x <- x[-miss,]
+        y <- y[-miss,]
+      }
+      frame <- as.matrix(cbind(x,y))
+      n <- ncol(frame)
+      Tab.x <- matrix(nrow = n, ncol = n)
+      pmatrix <- Tab.x
+    }else{
+      Vectors <- cbind.data.frame(...)
+      if ((length(x[,1]) != length(y[,1])) || (length(x[,1]) != length(Vectors[,1]))) {
+        stop("all vectors must have the same length")
+      }
+      if (sum(sapply(Vectors,is.numeric)) != length(Vectors)) {
+        stop("All vectors must be numeric")
+        stopifnot(is.atomic(y))
+      }
+      if (sum(is.na(x[,1])) > 0 || sum(is.na(y[,1])) > 0 || sum(is.na(Vectors)) > 0) {
+        warning("Missing data included in dataset was removed row-wise. Results may not be accurate.")
+        miss <- which(complete.cases(x,y,Vectors) == FALSE)
+        x <- x[-miss,]
+        y <- y[-miss,]
+        Vectors <- Vectors[-miss,]
+      }
+      frame <- as.matrix(cbind(x,y,Vectors))
+      n <- ncol(frame)
+      Tab.x <- matrix(nrow = n, ncol = n)
+      pmatrix <- Tab.x
     }
-    if (sum(is.na(x)) > 0 || sum(is.na(y)) > 0) {
-      warning("Missing data included in dataset was removed row-wise. Results may not be accurate.")
-      miss <- which(complete.cases(x,y) == FALSE)
-      x <- x[-miss,]
-      y <- y[-miss,]
-    }
-    frame <- as.matrix(cbind(x,y))
-    n <- ncol(frame)
-    Tab.x <- matrix(nrow = n, ncol = n)
-    pmatrix <- Tab.x
   }else{
-    Vectors <- cbind.data.frame(...)
-    if ((length(x[,1]) != length(y[,1])) || (length(x[,1]) != length(Vectors[,1]))) {
-      stop("all vectors must have the same length")
-    }
-    if (sum(sapply(Vectors,is.numeric)) != length(Vectors)) {
-      stop("All vectors must be numeric")
-      stopifnot(is.atomic(y))
-    }
-    if (sum(is.na(x[,1])) > 0 || sum(is.na(y[,1])) > 0 || sum(is.na(Vectors)) > 0) {
+    if (sum(is.na(x)) > 0) {
       warning("Missing data included in dataset was removed row-wise. Results may not be accurate.")
-      miss <- which(complete.cases(x,y,Vectors) == FALSE)
+      miss <- which(complete.cases(x) == FALSE)
       x <- x[-miss,]
-      y <- y[-miss,]
-      Vectors <- Vectors[-miss,]
     }
-    frame <- as.matrix(cbind(x,y,Vectors))
+    frame <- as.matrix(x)
     n <- ncol(frame)
     Tab.x <- matrix(nrow = n, ncol = n)
     pmatrix <- Tab.x

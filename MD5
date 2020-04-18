@@ -1,13 +1,13 @@
-33a6f7c535dc9468aae6020a3e84ec16 *DESCRIPTION
+a817c6b1fec696e0122ee357cb6c6bba *DESCRIPTION
 e80211a734589c13ce938650f8d110d2 *NAMESPACE
 d9864baeb0a3ea238b84e5bfdf58d10f *R/Taba.R
 33a1fcfa9f87cab7d66187c23d7f7f3c *R/TabaGpartial.R
-9e84c514a86ed8c4921e7b119fd15d8d *R/TabaMatrix.R
+948e5605da3b04dc421b0205144bb6fe *R/TabaMatrix.R
 19dfb348f18ac11c8b66c0745616f3e8 *R/TabaPartial.R
 c590e1d56cf1b01295e0133c88bfe15a *R/TabaTest.R
 5413a355a98c90996066b2889b812923 *man/taba.Rd
 c792037a45d62fb8781b4807ae74a816 *man/taba.gpartial.Rd
-70bea20080297bc7033605e701e719a2 *man/taba.matrix.Rd
+9daf1a10d0babfcae2363539165abab4 *man/taba.matrix.Rd
 a73d4871d1a3342841f7e6864b56c69c *man/taba.partial.Rd
 d9137b9174019c38f6128496388f6eb1 *man/taba.test.Rd
 541e3adbfc32a6fec636ab6dc7ec9660 *tests/testthat.R

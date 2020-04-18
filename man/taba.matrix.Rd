@@ -4,7 +4,7 @@
 \alias{taba.matrix}
 \title{Robust Correlation Matrix}
 \usage{
-taba.matrix(x, y, ..., method = c("taba", "tabarank"),
+taba.matrix(x, y = NULL, ..., method = c("taba", "tabarank"),
             alternative = c("less", "greater", "two.sided"),
             omega = 0.45)
 }
@@ -42,7 +42,8 @@ Calculates a correlation, distance, and p-value matrix using one of the
 \details{
 This function uses Taba linear or Taba rank (monotonic) correlation to
    calculate the association of two or more numeric vectors. Numeric vectors under \code{...}
-   are combined colomn-wise with x and y. \cr
+   are combined colomn-wise with x and y. When inserting a single matrix x, the function will
+   calculate the correlation matix using the columns of matrix x. \cr
    Matricies or data frames with numeric cells can be inserted in \code{...}, whereby
    each column in the matrix or data frame will be treated as a different vector
    for comparison. Columns must all have different names from each other. No vector
@@ -58,8 +59,11 @@ y = rnorm(100)
 z1 = rnorm(100)
 z2 = rnorm(100)
 z3 = rnorm(100)
-taba.partial(x, y, z1, z2, z3, method = "tabarank")
-taba.partial(x, y, z2, alternative = "less", omega = 0.4)
+Z = cbind(z1,z3)
+colnames(Z) = c("A","B")
+taba.matrix(x, y, z1, z2, z3, method = "tabarank")
+taba.matrix(x, y, z2, Z, alternative = "less", omega = 0.4)
+taba.matrix(Z, method = "tabarank")
 }
 \references{
 The paper is under review for possible publication.
