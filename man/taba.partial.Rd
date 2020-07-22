@@ -4,9 +4,9 @@
 \alias{taba.partial}
 \title{Robust Partial and Semipartial Correlation}
 \usage{
-taba.partial(x, y, ..., regress, method = c("taba", "tabarank"),
+taba.partial(x, y, ..., regress, method = c("taba", "tabarank", "tabwil", "tabwilrank"),
              alternative = c("less", "greater", "two.sided"),
-             semi = c("none", "x", "y"), omega = 0.45)
+             semi = c("none", "x", "y"), omega)
 }
 \arguments{
 \item{x}{A numeric vector of length greater than 2 must be same length as y and covariates
@@ -20,10 +20,10 @@ listed in ...}
 \item{regress}{A string variable "\code{linear}" for linear regression, "\code{logistic}" for binary
 logistic regression, and "\code{poisson}" for Poisson regression}
 
-\item{method}{A character string of \code{"taba"} or \code{"tabarank"} determining
-if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-respectively. If no method is specified, the function will output Taba
-linear correlation.}
+\item{method}{A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+\code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+(monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+the function will output Taba Linear correlation.}
 
 \item{alternative}{Character string specifying the alternative hypothesis must be one
 of \code{"less"} for negative association, \code{"greater"} for
@@ -33,10 +33,11 @@ If the alternative is not specified, the function will default to a two sided te
 \item{semi}{A character string specifying which variable (x or y) should be adjusted.}
 
 \item{omega}{Numeric allowing the user to alter the tuning constant. If one is not specified,
-the function will default to 0.45. Range is between 0 and 1.}
+the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+Range is between 0 and 1.}
 }
 \value{
-This function returns the robust linear or monotonic association
+This function returns the robust association
   between two numeric vectors, adjusting for specified covariates. In addition,
   this function can provide the semipartial correlation, if specified.
 }
@@ -53,8 +54,9 @@ This function calculates the partial or semipartial association of two
    treated as a different covariate, and must have different names from x and y.
    Missing values in x, y, or any of the covariates are deleted row-wise.
    The default for this function is a two sided test using Taba linear partial
-   correlation, with the tuning constant \code{omega} equal to 0.45.
-   Thr variable you are not controlling must be continuous when using semipartial correlation.
+   correlation, with the tuning constant \code{omega} equal to 0.45 for Taba and
+   Taba rank, and 0.1 for TabWil and TabWil rank. Range is between 0 and 1.
+   The variable you are not controlling must be continuous when using semipartial correlation.
 }
 \examples{
 x = rnorm(100)
@@ -62,7 +64,7 @@ y = rnorm(100)
 z1 = rnorm(100)
 z2 = rnorm(100)
 z3 = rnorm(100)
-taba.partial(x, y, z1, z2, z3, method = "tabarank")
+taba.partial(x, y, z1, z2, z3, method = "tabwilrank")
 taba.partial(x, y, z2, alternative = "less", semi = "x")
 }
 \references{

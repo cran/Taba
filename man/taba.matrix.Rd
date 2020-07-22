@@ -4,9 +4,9 @@
 \alias{taba.matrix}
 \title{Robust Correlation Matrix}
 \usage{
-taba.matrix(x, y = NULL, ..., method = c("taba", "tabarank"),
+taba.matrix(x, y = NULL, ..., method = c("taba","tabarank","tabwil","tabwilrank"),
             alternative = c("less", "greater", "two.sided"),
-            omega = 0.45)
+            omega)
 }
 \arguments{
 \item{x}{A numeric vector of length greater than 2 must be same length as all other vectors.}
@@ -17,10 +17,10 @@ taba.matrix(x, y = NULL, ..., method = c("taba", "tabarank"),
 or data.frame, whose columns will be compared and whose column's length must be of
 equal length to x and y. Not one vector or column name can be "x" or "y."}
 
-\item{method}{A character string of \code{"taba"} or \code{"tabarank"}
-determining if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-respectively. If no method is specified, the function will output Taba
-Linear correlation.}
+\item{method}{A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+\code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+(monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+the function will output Taba Linear correlation.}
 
 \item{alternative}{Character string specifying the alternative hypothesis must be one
 of \strong{\code{"less"}} for negative association, \code{"greater"} for
@@ -28,10 +28,11 @@ positive association, or \code{"two.sided"} for difference in association.
 If the alternative is not specified, the function will default to a two sided test.}
 
 \item{omega}{Numeric allowing the user to alter the tuning constant. If one is not specified,
-the function will default to 0.45. Range is between 0 and 1.}
+the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+Range is between 0 and 1.}
 }
 \value{
-This function returns the robust linear or monotonic association
+This function returns the robust association
   between two or more numeric vectors, as a matrix; the distance matrix, as type dist;
   and a p-value matrix corresponding to the correlation matrix.
 }
@@ -40,7 +41,7 @@ Calculates a correlation, distance, and p-value matrix using one of the
     specified robust methods Taba linear or Taba rank correlation.
 }
 \details{
-This function uses Taba linear or Taba rank (monotonic) correlation to
+This function uses Taba linear, Taba rank (monotonic), TabWil, or TabWil rank correlation to
    calculate the association of two or more numeric vectors. Numeric vectors under \code{...}
    are combined colomn-wise with x and y. When inserting a single matrix x, the function will
    calculate the correlation matix using the columns of matrix x. \cr

@@ -1,22 +1,23 @@
 #
 #' Robust Correlation
 #'
-#' @description Returns the Taba robust linear correlation or
-#'    Taba rank (monotonic) correlation between two numeric vectors.
-#' @usage taba(x, y, method = c("taba", "tabarank"), omega = 0.45)
+#' @description Returns the Taba robust linear, Taba rank (monotonic), TabWil, or
+#'    TabWil rank correlation coefficient between two numeric vectors.
+#' @usage taba(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank"), omega)
 #' @param x A numeric vector of length greater than 2 must be same length as y
 #' @param y A numeric vector of length greater than 2 must be same length as x
-#' @param method A character string of \code{"taba"} or \code{"tabarank"} determining
-#'   if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-#'   respectively. If no method is specified, the function will output Taba
-#'   linear correlation.
+#' @param method A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+#'    \code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+#'    (monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+#'    the function will output Taba Linear correlation.
 #' @param omega Numeric allowing the user to alter the tuning constant. If one is not specified,
-#'   the function will default to 0.45. Range is between 0 and 1.
+#'   the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+#'   Range is between 0 and 1.
 #' @details This function can be used to compare two non-empty numeric vectors of
 #'    length greater than two, or two columns of a data frame or matrix composed
 #'    of more than two numeric elements. Missing values in either x or y are
 #'    deleted row-wise. The default method is Taba Linear correlation, with the
-#'    tuning constant \code{omega} equal to 0.45.
+#'    tuning constant \code{omega}.
 #' @return This function returns a the robust linear or monotonic association
 #'   between two numeric vectors as a numeric.
 #' @seealso
@@ -30,21 +31,26 @@
 #' y = rnorm(100)
 #' taba(x, y)
 #' taba(x, y, method = "tabarank", omega = 0.4)
+#' taba(x, y, method = "tabwil", omega = 0.22)
 #' @import robustbase
 #'         stats
 #' @export taba
 
-taba = function(x, y, method = c("taba", "tabarank"), omega = 0.45) {
+taba = function(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank"), omega) {
   if (missing(method)) {
     method <- "taba"
   }
-  na.method <- pmatch(method, c("taba", "tabarank"))
+  na.method <- pmatch(method, c("taba", "tabarank","tabwil", "tabwilrank"))
   if (is.na(na.method)) {
     stop("invalid 'method' argument")
     method <- match.arg(method)
   }
   if (missing(omega)) {
-    omega <- 0.45
+    if (method == "taba" || method == "tabarank") {
+      omega <- 0.45
+    } else {
+      omega <- 0.05
+    }
   }
   if (omega > 1 || omega < 0) {
     stop("'omega' must be between 0 and 1")
@@ -77,7 +83,7 @@ taba = function(x, y, method = c("taba", "tabarank"), omega = 0.45) {
   if (length(x) != length(y)) {
     stop("'x' and 'y' must have the same length")
   }
-  if (method == "tabarank") {
+  if (method == "tabarank" || method == "tabwilrank") {
     x <- rank(x)
     y <- rank(y)
   }
@@ -88,12 +94,20 @@ taba = function(x, y, method = c("taba", "tabarank"), omega = 0.45) {
     s1 <- Sn(x)
     s2 <- Sn(y)
   }
-  medx <- median(x)
-  medy <- median(y)
-  a <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1)) *
-            ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))    )
-  b <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1))**2 )
-  c <- sum( ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))**2 )
-  out <- a / sqrt(b * c)
-  return(out)
+  if (method == "taba" || method == "tabarank") {
+    medx <- median(x)
+    medy <- median(y)
+    a <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1)) *
+              ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))    )
+    b <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1))**2 )
+    c <- sum( ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))**2 )
+    tcor <- a / sqrt(b * c)
+  } else {
+    u <- (x - median(x))/s1 + (y - median(y))/s2
+    v <- (x - median(x))/s1 - (y - median(y))/s2
+    a <-  ((1 / cosh(omega * (median(abs(u))**2))) * (median(abs(u))**2)) - ((1 / cosh(omega * (median(abs(v))**2))) * (median(abs(v))**2))
+    b <-  ((1 / cosh(omega * (median(abs(u))**2))) * (median(abs(u))**2)) + ((1 / cosh(omega * (median(abs(v))**2))) * (median(abs(v))**2))
+    tcor <- a / b
+  }
+  return(tcor)
 }

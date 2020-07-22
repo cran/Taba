@@ -4,19 +4,18 @@
 \alias{taba.test}
 \title{Robust Correlation Test}
 \usage{
-taba.test(x, y, method = c("taba", "tabarank"),
-          alternative = c("less", "greater", "two.sided"),
-          omega = 0.45)
+taba.test(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank"),
+         alternative = c("less", "greater", "two.sided"), omega)
 }
 \arguments{
 \item{x}{A numeric vector of length greater than 2 must be same length as y}
 
 \item{y}{A numeric vector of length greater than 2 must be same length as x}
 
-\item{method}{A character string of \code{"taba"} or \code{"tabarank"}
-determining if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-respectively. If no method is specified, the function will output Taba
-linear correlation.}
+\item{method}{A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+\code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+(monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+the function will output Taba Linear correlation.}
 
 \item{alternative}{Character string specifying the alternative hypothesis must be one
 of \code{"less"} for negative association, \code{"greater"} for
@@ -24,15 +23,16 @@ positive association, or \code{"two.sided"} for difference in association.
 If the alternative is not specified, the function will default to a two sided test.}
 
 \item{omega}{Numeric allowing the user to alter the tuning constant. If one is not specified,
-the function will default to 0.45. Range is between 0 and 1.}
+the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+Range is between 0 and 1.}
 }
 \value{
 This function returns the robust linear or monotonic association
   between two numeric vectors, along with it's respective test statistic, and p-value.
 }
 \description{
-Tests the association between two numeric vectors using Taba
-    robust linear or Taba rank (monotonic) correlation.
+Tests the association between two numeric vectors using Taba robust linear,
+   Taba rank (monotonic), TabWil, or TabWil rank correlation coefficient.
 }
 \details{
 This function tests the association of two non-empty numeric vectors of
@@ -42,14 +42,14 @@ This function tests the association of two non-empty numeric vectors of
    matrix or data frame will be treated as a different covariate, and must have
    different names. Missing values in either x or y are deleted row-wise. The two sided
    test with the null hypothesis correlation is equal to zero. The default is a two
-   sided test using Taba Linear correlation, with the tuning constant \code{omega}
-   equal to 0.45.
+   sided test using Taba Linear correlation, with tuning constant \code{omega}.
 }
 \examples{
 x = rnorm(10)
 y = rnorm(10)
-taba.test(x,y)
-taba.test(x,y,method = "tabarank", alternative = "less")$p.value
+taba.test(x, y)
+taba.test(x, y, method = "tabarank", alternative = "less")$p.value
+taba.test(x, y, method = "tabwil", omega = .1)
 }
 \references{
 The paper is under review for possible publication.

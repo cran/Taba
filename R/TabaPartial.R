@@ -3,9 +3,9 @@
 #'
 #' @description Calculates a partial or semipartial correlation using one of the
 #'    specified robust methods Taba linear or Taba rank correlation.
-#' @usage taba.partial(x, y, ..., regress, method = c("taba", "tabarank"),
+#' @usage taba.partial(x, y, ..., regress, method = c("taba", "tabarank", "tabwil", "tabwilrank"),
 #'              alternative = c("less", "greater", "two.sided"),
-#'              semi = c("none", "x", "y"), omega = 0.45)
+#'              semi = c("none", "x", "y"), omega)
 #' @param x A numeric vector of length greater than 2 must be same length as y and covariates
 #'          listed in ...
 #' @param y A numeric vector of length greater than 2 must be same length as x and covariates
@@ -13,17 +13,18 @@
 #' @param ... Numeric vectors used as covariates of length equal to x and y
 #' @param regress A string variable "\code{linear}" for linear regression, "\code{logistic}" for binary
 #'   logistic regression, and "\code{poisson}" for Poisson regression
-#' @param method A character string of \code{"taba"} or \code{"tabarank"} determining
-#'   if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-#'   respectively. If no method is specified, the function will output Taba
-#'   linear correlation.
+#' @param method A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+#'    \code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+#'    (monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+#'    the function will output Taba Linear correlation.
 #' @param alternative Character string specifying the alternative hypothesis must be one
 #'    of \code{"less"} for negative association, \code{"greater"} for
 #'    positive association, or \code{"two.sided"} for difference in association.
 #'    If the alternative is not specified, the function will default to a two sided test.
 #' @param semi A character string specifying which variable (x or y) should be adjusted.
 #' @param omega Numeric allowing the user to alter the tuning constant. If one is not specified,
-#'   the function will default to 0.45. Range is between 0 and 1.
+#'   the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+#'   Range is between 0 and 1.
 #' @details This function calculates the partial or semipartial association of two
 #'    numeric vectors, or columns of a matrix or data frame composed
 #'    of more than two numeric elements, adjusting for covariates of length equal to
@@ -32,9 +33,10 @@
 #'    treated as a different covariate, and must have different names from x and y.
 #'    Missing values in x, y, or any of the covariates are deleted row-wise.
 #'    The default for this function is a two sided test using Taba linear partial
-#'    correlation, with the tuning constant \code{omega} equal to 0.45.
-#'    Thr variable you are not controlling must be continuous when using semipartial correlation.
-#' @return This function returns the robust linear or monotonic association
+#'    correlation, with the tuning constant \code{omega} equal to 0.45 for Taba and
+#'    Taba rank, and 0.1 for TabWil and TabWil rank. Range is between 0 and 1.
+#'    The variable you are not controlling must be continuous when using semipartial correlation.
+#' @return This function returns the robust association
 #'   between two numeric vectors, adjusting for specified covariates. In addition,
 #'   this function can provide the semipartial correlation, if specified.
 #' @seealso
@@ -49,19 +51,19 @@
 #' z1 = rnorm(100)
 #' z2 = rnorm(100)
 #' z3 = rnorm(100)
-#' taba.partial(x, y, z1, z2, z3, method = "tabarank")
+#' taba.partial(x, y, z1, z2, z3, method = "tabwilrank")
 #' taba.partial(x, y, z2, alternative = "less", semi = "x")
 #' @import robustbase
 #'         stats
 #' @export taba.partial
 
-taba.partial = function(x, y, ..., regress, method = c("taba", "tabarank"),
+taba.partial = function(x, y, ..., regress, method = c("taba", "tabarank", "tabwil", "tabwilrank"),
                         alternative = c("less", "greater", "two.sided"),
-                        semi = c("none", "x", "y"), omega = 0.45) {
+                        semi = c("none", "x", "y"), omega) {
   if (missing(method)) {
     method <- "taba"
   }
-  na.method <- pmatch(method, c("taba", "tabarank"))
+  na.method <- pmatch(method, c("taba", "tabarank", "tabwil", "tabwilrank"))
   if (is.na(na.method)) {
     stop("invalid 'methods' argument")
     method <- match.arg(method)
@@ -91,7 +93,11 @@ taba.partial = function(x, y, ..., regress, method = c("taba", "tabarank"),
     semi <- match.arg(semi)
   }
   if (missing(omega)) {
-    omega <- 0.45
+    if (method == "taba" || method == "tabarank") {
+      omega <- 0.45
+    } else {
+      omega <- 0.05
+    }
   }
   if (omega > 1 || omega < 0) {
     stop("'omega' must be between 0 and 1")
@@ -154,7 +160,7 @@ taba.partial = function(x, y, ..., regress, method = c("taba", "tabarank"),
   }else{
     yres <- y
   }
-  if (method == "tabarank") {
+  if (method == "tabarank" || method == "tabwilrank") {
     xres <- rank(xres)
     yres <- rank(yres)
   }
@@ -165,21 +171,29 @@ taba.partial = function(x, y, ..., regress, method = c("taba", "tabarank"),
     s1 <- Sn(xres)
     s2 <- Sn(yres)
   }
-  medx <- median(xres)
-  medy <- median(yres)
-  a <- sum( ((1 / cosh(omega * ((xres - medx) / s1))) * ((xres - medx) / s1)) *
-            ((1 / cosh(omega * ((yres - medy) / s2))) * ((yres - medy) / s2))    )
-  b <- sum( ((1 / cosh(omega * ((xres - medx) / s1))) * ((xres - medx) / s1))**2 )
-  c <- sum( ((1 / cosh(omega * ((yres - medy) / s2))) * ((yres - medy) / s2))**2 )
-  tcor <- a / sqrt(b * c)
-  tTaba <- ( tcor * sqrt((k - 2) / (1 - tcor**2)) )
+  if (method == "taba" || method == "tabarank") {
+    medx <- median(xres)
+    medy <- median(yres)
+    a <- sum( ((1 / cosh(omega * ((xres - medx) / s1))) * ((xres - medx) / s1)) *
+              ((1 / cosh(omega * ((yres - medy) / s2))) * ((yres - medy) / s2))    )
+    b <- sum( ((1 / cosh(omega * ((xres - medx) / s1))) * ((xres - medx) / s1))**2 )
+    c <- sum( ((1 / cosh(omega * ((yres - medy) / s2))) * ((yres - medy) / s2))**2 )
+    tcor <- a / sqrt(b * c)
+  } else {
+    u <- (xres - median(xres))/s1 + (yres - median(yres))/s2
+    v <- (xres - median(xres))/s1 - (yres - median(yres))/s2
+    a <-  ((1 / cosh(omega * (median(abs(u))**2))) * (median(abs(u))**2)) - ((1 / cosh(omega * (median(abs(v))**2))) * (median(abs(v))**2))
+    b <-  ((1 / cosh(omega * (median(abs(u))**2))) * (median(abs(u))**2)) + ((1 / cosh(omega * (median(abs(v))**2))) * (median(abs(v))**2))
+    tcor <- a / b
+  }
+  tTaba <- ( tcor * sqrt((k - 2 - covlen) / (1 - tcor**2)) )
   if (alternative == "two.sided") {
-    p <- 2*pt(-abs(tTaba), (k - 2))
+    p <- 2*pt(-abs(tTaba), (k - 2 - covlen))
   }else{
     if (alternative == "greater") {
-      p <- pt(-abs(tTaba), (k - 2), lower.tail = TRUE)
+      p <- pt(-abs(tTaba), (k - 2 - covlen), lower.tail = TRUE)
     }else{
-      p <- pt(-abs(tTaba), (k - 2), lower.tail = FALSE)
+      p <- pt(-abs(tTaba), (k - 2 - covlen), lower.tail = FALSE)
     }
   }
   TabaC <- list(correlation = tcor,

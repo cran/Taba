@@ -5,9 +5,9 @@
 \title{Generalized Taba Partial and Taba Rank Partial Correlation}
 \usage{
 taba.gpartial(x, y, xcov, ycov, regress.x, regress.y,
-                     method = c("taba", "tabarank"),
+                     method = c("taba","tabarank","tabwil","tabwilrank"),
                      alternative = c("less", "greater", "two.sided"),
-                     omega = 0.45)
+                     omega)
 }
 \arguments{
 \item{x}{A numeric vector of length greater than 2 must be same length as y and covariates
@@ -28,10 +28,10 @@ logistic regression, and "\code{poisson}" for Poisson regression}
 \item{regress.y}{A string variable "\code{linear}" for linear regression, "\code{logistic}" for binary
 logistic regression, and "\code{poisson}" for Poisson regression}
 
-\item{method}{A character string of \code{"taba"} or \code{"tabarank"} determining
-if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-respectively. If no method is specified, the function will output Taba
-linear correlation.}
+\item{method}{A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+\code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+(monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+the function will output Taba Linear correlation.}
 
 \item{alternative}{Character string specifying the alternative hypothesis must be one
 of \code{"less"} for negative association, \code{"greater"} for
@@ -39,10 +39,11 @@ positive association, or \code{"two.sided"} for difference in association.
 If the alternative is not specified, the function will default to a two sided test.}
 
 \item{omega}{Numeric allowing the user to alter the tuning constant. If one is not specified,
-the function will default to 0.45. Range is between 0 and 1.}
+the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+Range is between 0 and 1.}
 }
 \value{
-This function returns the robust linear or monotonic association
+This function returns the robust association
   between two numeric vectors, adjusting for specified covariates. In addition,
   this function can provide the semipartial correlation, if specified.
 }
@@ -51,17 +52,17 @@ Calculates a generalized partial correlation using one of the
    specified robust methods Taba linear or Taba rank correlation.
 }
 \details{
-This function generalizes the Taba partial and Taba rank partial correlation.
-   In the event that the controlling variables for x and y are identical, it reduces to
-   Taba partial and Taba rank partial correlation. Covariates used to control for x
-   should be represented columnwise in a matrix or data frame as \code{xcov}. Simularly,
+This function generalizes the partial correlation. In the event that the controlling
+   variables for x and y are identical, it reduces to Taba, Taba rank, TabWil, and TabWil
+   rank partial correlation. Covariates used to control for x
+   should be represented columnwise in a matrix or data frame as \code{xcov}. Similarly,
    covariates used to control for y should be represented columnwise in a matrix or
    data frame as \code{ycov}. When controling an outcome variable with one covariate,
    a vector will suffice. Because x and y refer to the outcome varibales, names of
    covariates (or control variables) must not be named "x" or "y". The user has the
    option of using different regression methods when controling each outcome variable.
    Missing values in x, y, or any of the covariates are deleted row-wise. All categorical
-   variables must be converted to type factor prior to using this function.
+   variables must be converted to type factor prior to using this function. \cr
    The default for this function is a two sided test using generalized partial Taba
    correlation using a linear regression to obtain residuals, with the tuning
    constant \code{omega} equal to 0.45.

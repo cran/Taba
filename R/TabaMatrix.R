@@ -3,25 +3,26 @@
 #'
 #' @description Calculates a correlation, distance, and p-value matrix using one of the
 #'     specified robust methods Taba linear or Taba rank correlation.
-#' @usage taba.matrix(x, y = NULL, ..., method = c("taba", "tabarank"),
+#' @usage taba.matrix(x, y = NULL, ..., method = c("taba","tabarank","tabwil","tabwilrank"),
 #'             alternative = c("less", "greater", "two.sided"),
-#'             omega = 0.45)
+#'             omega)
 #' @param x A numeric vector of length greater than 2 must be same length as all other vectors.
 #' @param y A numeric vector of length greater than 2 must be same length as all other vectors.
 #' @param ... Numeric vector(s) of length equal to x and y. May be of class matrix
 #'    or data.frame, whose columns will be compared and whose column's length must be of
 #'    equal length to x and y. Not one vector or column name can be "x" or "y."
-#' @param method A character string of \code{"taba"} or \code{"tabarank"}
-#'    determining if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-#'    respectively. If no method is specified, the function will output Taba
-#'    Linear correlation.
+#' @param method A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+#'    \code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+#'    (monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+#'    the function will output Taba Linear correlation.
 #' @param alternative Character string specifying the alternative hypothesis must be one
 #'    of \strong{\code{"less"}} for negative association, \code{"greater"} for
 #'    positive association, or \code{"two.sided"} for difference in association.
 #'    If the alternative is not specified, the function will default to a two sided test.
 #' @param omega Numeric allowing the user to alter the tuning constant. If one is not specified,
-#'    the function will default to 0.45. Range is between 0 and 1.
-#' @details This function uses Taba linear or Taba rank (monotonic) correlation to
+#'   the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+#'   Range is between 0 and 1.
+#' @details This function uses Taba linear, Taba rank (monotonic), TabWil, or TabWil rank correlation to
 #'    calculate the association of two or more numeric vectors. Numeric vectors under \code{...}
 #'    are combined colomn-wise with x and y. When inserting a single matrix x, the function will
 #'    calculate the correlation matix using the columns of matrix x. \cr
@@ -33,7 +34,7 @@
 #'    are deleted row-wise. \cr
 #'    The default for this function is a two sided test using Taba linear partial correlation,
 #'    with the tuning constant \code{omega} equal to 0.45.
-#' @return This function returns the robust linear or monotonic association
+#' @return This function returns the robust association
 #'   between two or more numeric vectors, as a matrix; the distance matrix, as type dist;
 #'   and a p-value matrix corresponding to the correlation matrix.
 #' @seealso
@@ -57,13 +58,13 @@
 #'         stats
 #' @export taba.matrix
 
-taba.matrix = function(x, y = NULL, ..., method = c("taba", "tabarank"),
+taba.matrix = function(x, y = NULL, ..., method = c("taba","tabarank","tabwil","tabwilrank"),
                        alternative = c("less", "greater", "two.sided"),
-                       omega = 0.45) {
+                       omega) {
   if (missing(method)) {
     method <- "taba"
   }
-  na.method <- pmatch(method, c("taba", "tabarank"))
+  na.method <- pmatch(method, c("taba","tabarank","tabwil","tabwilrank"))
   if (is.na(na.method)) {
     stop("invalid 'methods' argument")
     method <- match.arg(method)
@@ -77,7 +78,11 @@ taba.matrix = function(x, y = NULL, ..., method = c("taba", "tabarank"),
     alternative <- match.arg(alternative)
   }
   if (missing(omega)) {
-    omega <- 0.45
+    if (method == "taba" || method == "tabarank") {
+      omega <- 0.45
+    } else {
+      omega <- 0.05
+    }
   }
   if (omega > 1 || omega < 0) {
     stop("'omega' must be between 0 and 1")
@@ -137,7 +142,7 @@ taba.matrix = function(x, y = NULL, ..., method = c("taba", "tabarank"),
     pmatrix <- Tab.x
   }
   Tab = function(x, y, method, alternative, omega) {
-    if (method == "tabarank") {
+    if (method == "tabarank" || method == "tabwilrank") {
       x <- rank(x)
       y <- rank(y)
     }
@@ -148,13 +153,21 @@ taba.matrix = function(x, y = NULL, ..., method = c("taba", "tabarank"),
       s1 <- Sn(x)
       s2 <- Sn(y)
     }
-    medx <- median(x)
-    medy <- median(y)
-    a <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1)) *
-              ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))    )
-    b <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1))**2 )
-    c <- sum( ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))**2 )
-    tcor <- a / sqrt(b * c)
+    if (method == "taba" || method == "tabarank") {
+      medx <- median(x)
+      medy <- median(y)
+      a <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1)) *
+                ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))    )
+      b <- sum( ((1 / cosh(omega * ((x - medx) / s1))) * ((x - medx) / s1))**2 )
+      c <- sum( ((1 / cosh(omega * ((y - medy) / s2))) * ((y - medy) / s2))**2 )
+      tcor <- a / sqrt(b * c)
+    } else {
+      u <- (x - median(x))/s1 + (y - median(y))/s2
+      v <- (x - median(x))/s1 - (y - median(y))/s2
+      a <-  ((1 / cosh(omega * (median(abs(u))**2))) * (median(abs(u))**2)) - ((1 / cosh(omega * (median(abs(v))**2))) * (median(abs(v))**2))
+      b <-  ((1 / cosh(omega * (median(abs(u))**2))) * (median(abs(u))**2)) + ((1 / cosh(omega * (median(abs(v))**2))) * (median(abs(v))**2))
+      tcor <- a / b
+    }
     lenx <- length(x)
     tTaba <- tcor * sqrt((lenx - 2)/(1 - tcor**2))
     if (alternative == "two.sided") {

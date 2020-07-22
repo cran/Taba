@@ -4,41 +4,43 @@
 \alias{taba}
 \title{Robust Correlation}
 \usage{
-taba(x, y, method = c("taba", "tabarank"), omega = 0.45)
+taba(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank"), omega)
 }
 \arguments{
 \item{x}{A numeric vector of length greater than 2 must be same length as y}
 
 \item{y}{A numeric vector of length greater than 2 must be same length as x}
 
-\item{method}{A character string of \code{"taba"} or \code{"tabarank"} determining
-if one wants to calculate Taba linear or Taba rank (monotonic) correlation,
-respectively. If no method is specified, the function will output Taba
-linear correlation.}
+\item{method}{A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
+\code{"tabwilrank"} determining if one wants to calculate Taba linear, Taba rank
+(monotonic), TabWil, or TabWil rank correlation, respectively. If no method is specified,
+the function will output Taba Linear correlation.}
 
 \item{omega}{Numeric allowing the user to alter the tuning constant. If one is not specified,
-the function will default to 0.45. Range is between 0 and 1.}
+the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
+Range is between 0 and 1.}
 }
 \value{
 This function returns a the robust linear or monotonic association
   between two numeric vectors as a numeric.
 }
 \description{
-Returns the Taba robust linear correlation or
-   Taba rank (monotonic) correlation between two numeric vectors.
+Returns the Taba robust linear, Taba rank (monotonic), TabWil, or
+   TabWil rank correlation coefficient between two numeric vectors.
 }
 \details{
 This function can be used to compare two non-empty numeric vectors of
    length greater than two, or two columns of a data frame or matrix composed
    of more than two numeric elements. Missing values in either x or y are
    deleted row-wise. The default method is Taba Linear correlation, with the
-   tuning constant \code{omega} equal to 0.45.
+   tuning constant \code{omega}.
 }
 \examples{
 x = rnorm(100)
 y = rnorm(100)
 taba(x, y)
 taba(x, y, method = "tabarank", omega = 0.4)
+taba(x, y, method = "tabwil", omega = 0.22)
 }
 \references{
 The paper is under review for possible publication.
