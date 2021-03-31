@@ -4,8 +4,9 @@
 \alias{taba.test}
 \title{Robust Correlation Test}
 \usage{
-taba.test(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank"),
-         alternative = c("less", "greater", "two.sided"), omega)
+taba.test(x, y, method = c("taba", "tabarank", "tabwil", "tabwilrank"),
+          alternative = c("less", "greater", "two.sided"),
+          omega, alpha = 0.05)
 }
 \arguments{
 \item{x}{A numeric vector of length greater than 2 must be same length as y}
@@ -25,6 +26,8 @@ If the alternative is not specified, the function will default to a two sided te
 \item{omega}{Numeric allowing the user to alter the tuning constant. If one is not specified,
 the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
 Range is between 0 and 1.}
+
+\item{alpha}{Type I error rate. Numeric must be between 0 and 1. Default set to 0.05.}
 }
 \value{
 This function returns the robust linear or monotonic association
@@ -52,7 +55,9 @@ taba.test(x, y, method = "tabarank", alternative = "less")$p.value
 taba.test(x, y, method = "tabwil", omega = .1)
 }
 \references{
-The paper is under review for possible publication.
+Tabatabai, M., Bailey, S., Bursac, Z. et al. An introduction to new robust linear
+  and monotonic correlation coefficients. BMC Bioinformatics 22, 170 (2021). https://doi.org/10.1186/s12859-021-04098-4
+  \cr{\cr{\doi{https://doi.org/10.1186/s12859-021-04098-4}}}
 }
 \seealso{
 \code{\link{taba}} for calculating Taba linear or Taba rank (monotonic) correlations

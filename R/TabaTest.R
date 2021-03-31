@@ -3,8 +3,9 @@
 #'
 #' @description Tests the association between two numeric vectors using Taba robust linear,
 #'    Taba rank (monotonic), TabWil, or TabWil rank correlation coefficient.
-#' @usage taba.test(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank"),
-#'          alternative = c("less", "greater", "two.sided"), omega)
+#' @usage taba.test(x, y, method = c("taba", "tabarank", "tabwil", "tabwilrank"),
+#'           alternative = c("less", "greater", "two.sided"),
+#'           omega, alpha = 0.05)
 #' @param x A numeric vector of length greater than 2 must be same length as y
 #' @param y A numeric vector of length greater than 2 must be same length as x
 #' @param method A character string of \code{"taba"}, \code{"tabarank"}, \code{"tabwil"}, or
@@ -18,6 +19,7 @@
 #' @param omega Numeric allowing the user to alter the tuning constant. If one is not specified,
 #'   the function will default to 0.45 for Taba and Taba rank, and 0.1 for TabWil and TabWil rank.
 #'   Range is between 0 and 1.
+#' @param alpha Type I error rate. Numeric must be between 0 and 1. Default set to 0.05.
 #' @details This function tests the association of two non-empty numeric vectors of
 #'    length greater than two, or two columns of a data frame or matrix composed
 #'    of more than two numeric elements. Covariates are combined colomn-wise and can be
@@ -33,7 +35,9 @@
 #'   \cr\code{\link{taba.partial}} for partial and semipartial correlations
 #'   \cr\code{\link{taba.gpartial}} for generalized partial correlations
 #'   \cr\code{\link{taba.matrix}} for calculating correlation, p-value, and distance matricies
-#' @references The paper is under review for possible publication.
+#' @references Tabatabai, M., Bailey, S., Bursac, Z. et al. An introduction to new robust linear
+#'   and monotonic correlation coefficients. BMC Bioinformatics 22, 170 (2021). https://doi.org/10.1186/s12859-021-04098-4
+#'   \cr{\cr{\doi{https://doi.org/10.1186/s12859-021-04098-4}}}
 #' @examples
 #' x = rnorm(10)
 #' y = rnorm(10)
@@ -42,11 +46,11 @@
 #' taba.test(x, y, method = "tabwil", omega = .1)
 #' @import robustbase
 #'         stats
-#' @export
+#' @export taba.test
 
-taba.test = function(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank"),
-                     alternative = c("less", "greater", "two.sided"),
-                     omega) {
+taba.test = function(x, y, method = c("taba", "tabarank", "tabwil", "tabwilrank"),
+                      alternative = c("less", "greater", "two.sided"),
+                      omega, alpha = 0.05) {
   if (missing(method)) {
     method <- "taba"
   }
@@ -69,6 +73,13 @@ taba.test = function(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank")
     } else {
       omega <- 0.05
     }
+  }
+  if (missing(alpha)) {
+    alpha <- 0.05
+  }
+  if (alpha > 1 || alpha < 0) {
+    stop("'alpha' must be between 0 and 1")
+    alpha <- match.arg(alpha)
   }
   if (omega > 1 || omega < 0) {
     stop("'omega' must be between 0 and 1")
@@ -131,14 +142,37 @@ taba.test = function(x, y, method = c("taba", "tabarank","tabwil", "tabwilrank")
   t    <- tcor * sqrt( (k - 2) / (1 - tcor**2) )
   if (alternative == "two.sided") {
     p <- 2*pt(-abs(t), (k - 2))
+    small  <- tanh(atanh(tcor) - qnorm(1 - alpha/2) * sqrt((1 + 0.5*tcor**2) / (k - 3)))
+    large  <- tanh(atanh(tcor) + qnorm(1 - alpha/2) * sqrt((1 + 0.5*tcor**2) / (k - 3)))
+    lcl <- min(small,large)
+    ucl <- max(small,large)
   }else{
     if (alternative == "greater") {
       p <- pt(-abs(t), (k - 2), lower.tail = TRUE)
+      small  <- tanh(atanh(tcor) - qnorm(1 - alpha) * sqrt((1 + 0.5*tcor**2) / (k - 3)))
+      large  <- tanh(atanh(tcor) + qnorm(1 - alpha) * sqrt((1 + 0.5*tcor**2) / (k - 3)))
     }else{
       p <- pt(-abs(t), (k - 2), lower.tail = FALSE)
+      small  <- tanh(atanh(tcor) - qnorm(alpha) * sqrt((1 + 0.5*tcor**2) / (k - 3)))
+      large  <- tanh(atanh(tcor) + qnorm(alpha) * sqrt((1 + 0.5*tcor**2) / (k - 3)))
     }
+    lcl <- min(small,large)
+    ucl <- max(small,large)
+  }
+  if (tcor == 1) {
+    lcl <- 1
+    ucl <- 1
+    t <- Inf
+    p <- 0
+  }else if (tcor == -1){
+    lcl <- -1
+    ucl <- -1
+    t <- Inf
+    p <- 0
   }
   out  <- list(correlation = tcor,
+               LCL = lcl,
+               UCL = ucl,
                t.statistic = t,
                p.value     = p )
   return(out)

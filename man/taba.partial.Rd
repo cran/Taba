@@ -68,7 +68,9 @@ taba.partial(x, y, z1, z2, z3, method = "tabwilrank")
 taba.partial(x, y, z2, alternative = "less", semi = "x")
 }
 \references{
-The paper is under review for possible publication.
+Tabatabai, M., Bailey, S., Bursac, Z. et al. An introduction to new robust linear
+  and monotonic correlation coefficients. BMC Bioinformatics 22, 170 (2021). https://doi.org/10.1186/s12859-021-04098-4
+  \cr{\cr{\doi{https://doi.org/10.1186/s12859-021-04098-4}}}
 }
 \seealso{
 \code{\link{taba}} for calculating Taba linear or Taba rank (monotonic) correlations

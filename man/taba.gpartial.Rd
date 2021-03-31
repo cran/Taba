@@ -5,9 +5,9 @@
 \title{Generalized Taba Partial and Taba Rank Partial Correlation}
 \usage{
 taba.gpartial(x, y, xcov, ycov, regress.x, regress.y,
-                     method = c("taba","tabarank","tabwil","tabwilrank"),
-                     alternative = c("less", "greater", "two.sided"),
-                     omega)
+              method = c("taba","tabarank","tabwil","tabwilrank"),
+              alternative = c("less", "greater", "two.sided"),
+              omega)
 }
 \arguments{
 \item{x}{A numeric vector of length greater than 2 must be same length as y and covariates
@@ -76,10 +76,12 @@ z3 = rnorm(100)
 w = sample(c(0,1), replace=TRUE, size=100)
 taba.gpartial(x, y, xcov = cbind(z1, z2), ycov = cbind(z1, z3), method = "tabarank")
 taba.gpartial(x, y, z2, ycov = cbind(z1, z2), alternative = "less")
-taba.gpartial(w, y, z1, cbind(z2,z3),regress.x = "logistic")
+taba.gpartial(w, y, z1, cbind(z2, z3),regress.x = "logistic")
 }
 \references{
-The paper is under review for possible publication.
+Tabatabai, M., Bailey, S., Bursac, Z. et al. An introduction to new robust linear
+  and monotonic correlation coefficients. BMC Bioinformatics 22, 170 (2021). https://doi.org/10.1186/s12859-021-04098-4
+  \cr{\cr{\doi{https://doi.org/10.1186/s12859-021-04098-4}}}
 }
 \seealso{
 \code{\link{taba}} for calculating Taba linear or Taba rank (monotonic) correlations

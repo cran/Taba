@@ -4,9 +4,9 @@
 #' @description Calculates a generalized partial correlation using one of the
 #'    specified robust methods Taba linear or Taba rank correlation.
 #' @usage taba.gpartial(x, y, xcov, ycov, regress.x, regress.y,
-#'                      method = c("taba","tabarank","tabwil","tabwilrank"),
-#'                      alternative = c("less", "greater", "two.sided"),
-#'                      omega)
+#'               method = c("taba","tabarank","tabwil","tabwilrank"),
+#'               alternative = c("less", "greater", "two.sided"),
+#'               omega)
 #' @param x A numeric vector of length greater than 2 must be same length as y and covariates
 #'          listed in x and ycov
 #' @param y A numeric vector of length greater than 2 must be same length as x and covariates
@@ -52,7 +52,9 @@
 #'   \cr\code{\link{taba.test}} for testing Taba linear or Taba rank Monotonic correlations
 #'   \cr\code{\link{taba.partial}} for partial and semipartial correlations
 #'   \cr\code{\link{taba.matrix}} for calculating correlation, p-value, and distance matricies
-#' @references The paper is under review for possible publication.
+#' @references Tabatabai, M., Bailey, S., Bursac, Z. et al. An introduction to new robust linear
+#'   and monotonic correlation coefficients. BMC Bioinformatics 22, 170 (2021). https://doi.org/10.1186/s12859-021-04098-4
+#'   \cr{\cr{\doi{https://doi.org/10.1186/s12859-021-04098-4}}}
 #' @examples
 #' x = rnorm(100)
 #' y = rnorm(100)
@@ -62,7 +64,7 @@
 #' w = sample(c(0,1), replace=TRUE, size=100)
 #' taba.gpartial(x, y, xcov = cbind(z1, z2), ycov = cbind(z1, z3), method = "tabarank")
 #' taba.gpartial(x, y, z2, ycov = cbind(z1, z2), alternative = "less")
-#' taba.gpartial(w, y, z1, cbind(z2,z3),regress.x = "logistic")
+#' taba.gpartial(w, y, z1, cbind(z2, z3),regress.x = "logistic")
 #' @import robustbase
 #'         stats
 #' @export taba.gpartial

@@ -42,7 +42,9 @@
 #'   \cr\code{\link{taba.test}} for testing Taba linear or Taba rank (monotonic) correlations
 #'   \cr\code{\link{taba.gpartial}} for generalized partial correlations
 #'   \cr\code{\link{taba.partial}} for partial and semipartial correlations
-#' @references The paper is under review for possible publication.
+#' @references Tabatabai, M., Bailey, S., Bursac, Z. et al. An introduction to new robust linear
+#'   and monotonic correlation coefficients. BMC Bioinformatics 22, 170 (2021). https://doi.org/10.1186/s12859-021-04098-4
+#'   \cr{\cr{\doi{https://doi.org/10.1186/s12859-021-04098-4}}}
 #' @examples
 #' x = rnorm(100)
 #' y = rnorm(100)

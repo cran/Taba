@@ -67,7 +67,9 @@ taba.matrix(x, y, z2, Z, alternative = "less", omega = 0.4)
 taba.matrix(Z, method = "tabarank")
 }
 \references{
-The paper is under review for possible publication.
+Tabatabai, M., Bailey, S., Bursac, Z. et al. An introduction to new robust linear
+  and monotonic correlation coefficients. BMC Bioinformatics 22, 170 (2021). https://doi.org/10.1186/s12859-021-04098-4
+  \cr{\cr{\doi{https://doi.org/10.1186/s12859-021-04098-4}}}
 }
 \seealso{
 \code{\link{taba}} for calculating Taba linear or Taba rank (monotonic) correlations
